@@ -1,0 +1,577 @@
+/*
+ * Design tokens — Toss Design System (TDS) palette & type rhythm, adapted for an
+ * ADDITIVE display. On Ray-Ban Display, black pixels emit no light (= see-through),
+ * and every lit pixel costs battery and blocks the wearer's view. So:
+ *   - the canvas is pure black, never TDS's #17171C dark surface
+ *   - surfaces are low-luminance greys used sparingly (cards, focus)
+ *   - TDS grey ramp + blue/red keep the Toss "feel": calm, numeric, high-contrast
+ *
+ * Korean market convention (and Toss): up = red, down = blue.
+ */
+:root {
+  color-scheme: dark;
+
+  /* TDS grey ramp (dark-mode reading) */
+  --grey-50: #f9fafb;
+  --grey-100: #f2f4f6;
+  --grey-300: #d1d6db;
+  --grey-400: #b0b8c1;
+  --grey-500: #8b95a1;
+  --grey-600: #6b7684;
+  --grey-700: #4e5968;
+  --grey-800: #333d4b;
+  --grey-900: #191f28;
+
+  /* TDS brand + semantic */
+  --blue-400: #4593fc;
+  --blue-500: #3182f6;
+  --red-400: #f66570;
+  --red-500: #f04452;
+
+  /* Semantic roles — components reference only these */
+  --bg: #000;
+  --surface: #111318;
+  --surface-focus: #1b2533;
+  --text-primary: var(--grey-50);
+  --text-secondary: var(--grey-400);
+  --text-tertiary: var(--grey-500);
+  --line: #23272e;
+  --accent: var(--blue-500);
+  --up: var(--red-400);
+  --down: var(--blue-400);
+  --focus-ring: var(--blue-500);
+
+  /* Type scale (TDS t1–t7 rhythm, enlarged ~1.3× for a 600px lens at arm's-length focus) */
+  --t-hero: 700 44px/1.15 var(--font);
+  --t-1: 700 30px/1.3 var(--font);
+  --t-2: 700 26px/1.35 var(--font);
+  --t-3: 600 22px/1.4 var(--font);
+  --t-body: 500 22px/1.45 var(--font);
+  --t-sub: 500 19px/1.4 var(--font);
+  --t-cap: 500 17px/1.35 var(--font);
+
+  --radius-card: 20px;
+  --radius-btn: 16px;
+  --gutter: 24px;
+
+  /* Toss Product Sans isn't redistributable; Pretendard is the closest open (OFL) match.
+     Neither is bundled: Korean webfonts are 1MB+, far over the 300KB glasses budget. */
+  --font: 'Toss Product Sans', Pretendard, 'Apple SD Gothic Neo', 'Noto Sans KR', system-ui, sans-serif;
+
+  font: var(--t-body);
+  font-feature-settings: 'tnum'; /* tabular numbers: prices don't jitter as they tick */
+  background: var(--bg);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- Fixed 600×600 canvas (Meta custom-UI contract) ---------------------------------- */
+html,
+body {
+  width: 100%;
+  height: 100%;
+  min-width: 600px;
+  min-height: 600px;
+  margin: 0;
+  background: var(--bg);
+}
+body {
+  display: grid;
+  place-items: center;
+  overflow: auto;
+}
+#root {
+  width: 600px;
+  height: 600px;
+  min-width: 600px;
+  min-height: 600px;
+  overflow: hidden;
+  background: var(--bg);
+  position: relative;
+}
+* {
+  box-sizing: border-box;
+}
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+/* ---- Screen skeleton: header / scrolling content / bottom dock ------------------------ */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+.screen-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px var(--gutter) 8px;
+  min-height: 72px;
+}
+.screen-title {
+  font: var(--t-2);
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.screen-body {
+  overflow-y: auto;
+  scrollbar-width: none;
+  padding: 4px var(--gutter) 16px;
+}
+.screen-body::-webkit-scrollbar {
+  display: none;
+}
+.dock {
+  display: flex;
+  gap: 12px;
+  padding: 12px var(--gutter) 20px;
+}
+
+/* ---- Focus: the ONLY pointer on glasses. Must be unmistakable at a glance. ------------- */
+[data-row] {
+  outline: none;
+  transition: background-color 120ms ease, box-shadow 120ms ease;
+}
+[data-row][data-offscreen] {
+  visibility: hidden;
+}
+[data-row]:focus-visible,
+[data-row]:focus {
+  box-shadow: 0 0 0 3px var(--focus-ring);
+  background-color: var(--surface-focus);
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-row] {
+    transition: none;
+  }
+}
+
+/* ---- Top tabs (TDS Tab, text-only) ---------------------------------------------------- */
+.tabs {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+}
+.tab {
+  border: 0;
+  background: transparent;
+  font: var(--t-2);
+  color: var(--text-tertiary);
+  padding: 6px 12px;
+  border-radius: 12px;
+  min-height: 52px;
+}
+.tab[aria-selected='true'] {
+  color: var(--text-primary);
+}
+
+/* ---- Chip (mode badge, filters) ------------------------------------------------------- */
+.badge {
+  font: var(--t-cap);
+  color: var(--grey-300);
+  background: var(--grey-800);
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.badge.live {
+  color: #fff;
+  background: var(--red-500);
+}
+
+.segmented {
+  display: flex;
+  gap: 8px;
+  margin: 4px 0 12px;
+}
+.seg {
+  border: 0;
+  flex: 1;
+  background: var(--surface);
+  color: var(--text-secondary);
+  border-radius: 12px;
+  font: var(--t-sub);
+  min-height: 52px;
+  padding: 0 8px;
+}
+.seg[aria-pressed='true'] {
+  color: var(--text-primary);
+  background: var(--grey-800);
+}
+
+/* ---- List row (TDS ListRow): left text stack, right numeric stack ---------------------- */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+}
+.row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 76px;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 16px;
+  background: transparent;
+  text-align: left;
+}
+.row-rank {
+  font: var(--t-3);
+  color: var(--accent);
+  width: 28px;
+  text-align: center;
+  flex: none;
+}
+.row-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.row-title {
+  font: var(--t-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.row-sub {
+  font: var(--t-cap);
+  color: var(--text-tertiary);
+}
+.row-end {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex: none;
+}
+.row-price {
+  font: var(--t-3);
+}
+.row-change {
+  font: var(--t-cap);
+}
+
+.up {
+  color: var(--up);
+}
+.down {
+  color: var(--down);
+}
+.flat {
+  color: var(--text-secondary);
+}
+
+/* ---- Index strip & asset card --------------------------------------------------------- */
+.indices {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.index {
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.index-name {
+  font: var(--t-cap);
+  color: var(--text-secondary);
+}
+.index-value {
+  font: 700 22px/1.3 var(--font);
+}
+.index-change {
+  font: var(--t-cap);
+}
+
+.asset {
+  width: 100%;
+  border: 0;
+  text-align: left;
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  padding: 16px 18px;
+  margin-bottom: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+.asset-label {
+  font: var(--t-sub);
+  color: var(--text-secondary);
+}
+.asset-value {
+  font: var(--t-1);
+}
+.section-label {
+  font: var(--t-sub);
+  color: var(--text-secondary);
+  margin: 6px 14px 4px;
+}
+
+/* ---- Buttons (TDS Button: fill, large) ------------------------------------------------- */
+.btn {
+  flex: 1;
+  border: 0;
+  border-radius: var(--radius-btn);
+  min-height: 72px;
+  font: var(--t-2);
+  background: var(--grey-800);
+  color: var(--text-primary);
+  position: relative;
+  overflow: hidden;
+}
+.btn.primary {
+  background: var(--blue-500);
+  color: #fff;
+}
+.btn.buy {
+  background: var(--red-500);
+  color: #fff;
+}
+.btn.sell {
+  background: var(--blue-500);
+  color: #fff;
+}
+.btn[data-row]:focus {
+  box-shadow: 0 0 0 3px var(--grey-50);
+}
+.btn:disabled {
+  opacity: 0.45;
+}
+/* Arming bar for the final confirm button (see Order.tsx) */
+.btn .arming {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.8);
+  transform-origin: left;
+  animation: arm var(--arm-ms, 900ms) linear forwards;
+}
+@keyframes arm {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* ---- Stock detail ---------------------------------------------------------------------- */
+.price-hero {
+  font: var(--t-hero);
+  margin: 0;
+}
+.price-change {
+  font: var(--t-3);
+  margin: 4px 0 10px;
+}
+.spark {
+  display: block;
+  width: 100%;
+  height: 120px;
+  margin-bottom: 10px;
+}
+.kv {
+  display: flex;
+  justify-content: space-between;
+  font: var(--t-sub);
+  padding: 8px 2px;
+  border-top: 1px solid var(--line);
+}
+.kv dt {
+  color: var(--text-secondary);
+}
+.kv dd {
+  margin: 0;
+}
+
+/* ---- Orderbook ------------------------------------------------------------------------- */
+.book {
+  display: grid;
+  gap: 4px;
+}
+.book-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  font: var(--t-sub);
+  padding: 6px 12px;
+  border-radius: 10px;
+  position: relative;
+}
+.book-row .vol {
+  text-align: right;
+  color: var(--text-secondary);
+}
+.book-row.ask {
+  background: rgba(69, 147, 252, 0.08);
+}
+.book-row.bid {
+  background: rgba(246, 101, 112, 0.08);
+}
+.book-row.last {
+  box-shadow: inset 0 0 0 2px var(--grey-600);
+}
+
+/* ---- Order flow ------------------------------------------------------------------------ */
+.question {
+  font: var(--t-1);
+  margin: 8px 0 18px;
+}
+.stepper {
+  width: 100%;
+  border: 0;
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  min-height: 76px;
+}
+.stepper-label {
+  font: var(--t-sub);
+  color: var(--text-secondary);
+}
+.stepper-value {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font: var(--t-2);
+}
+.stepper-arrow {
+  color: var(--text-tertiary);
+  font: var(--t-3);
+}
+.stepper:focus .stepper-arrow {
+  color: var(--accent);
+}
+.summary {
+  margin: 8px 0 0;
+}
+.warn {
+  font: var(--t-cap);
+  color: var(--grey-400);
+  margin: 6px 2px 0;
+}
+.warn::before {
+  content: '· ';
+}
+.result {
+  display: grid;
+  place-items: center;
+  text-align: center;
+  gap: 8px;
+  padding-top: 40px;
+}
+.result-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--blue-500);
+  font: 700 40px/1 var(--font);
+  color: #fff;
+}
+
+/* ---- Voice / handwriting entry: a real <input> so the system composer opens ----------- */
+.voice {
+  flex: none;
+  width: 56px;
+  height: 52px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--surface);
+  color: transparent;
+  caret-color: transparent;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23b0b8c1'%3E%3Cpath d='M12 14a3 3 0 0 0 3-3V5a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2Z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 26px;
+}
+.voice::placeholder {
+  color: transparent;
+}
+.voice.listening {
+  background-color: var(--blue-500);
+}
+
+/* ---- Toast (voice echo, errors) ------------------------------------------------------- */
+.toast {
+  position: absolute;
+  left: var(--gutter);
+  right: var(--gutter);
+  top: 76px; /* below the header — never over the bottom CTA dock */
+  background: var(--grey-800);
+  color: var(--text-primary);
+  border-radius: 16px;
+  padding: 14px 18px;
+  font: var(--t-sub);
+  z-index: 10;
+}
+
+/* ---- State views (loading / empty / error / offline / unpaired) ----------------------- */
+.state {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 12px;
+  text-align: center;
+  min-height: 300px;
+  color: var(--text-secondary);
+  font: var(--t-body);
+}
+.state strong {
+  font: var(--t-2);
+  color: var(--text-primary);
+}
+.skeleton {
+  background: var(--surface);
+  border-radius: 12px;
+  height: 64px;
+  margin-bottom: 8px;
+}
+.stale {
+  font: var(--t-cap);
+  color: var(--grey-500);
+  margin: 0 14px 6px;
+}
+.news-title {
+  font: var(--t-3);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  white-space: normal;
+}
+.article {
+  font: var(--t-body);
+  color: var(--grey-100);
+}
+.article h2 {
+  font: var(--t-2);
+  margin: 4px 0 8px;
+}
+.article p {
+  color: var(--grey-300);
+}
